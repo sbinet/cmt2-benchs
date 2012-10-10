@@ -111,7 +111,8 @@ public:
     C%(p)s ();
     ~C%(p)s ();
     void f();
-private:\n'''  % {"p":self.name}
+private:
+'''  % {"p":self.name}
 
 	if len(self.uses) > 0:
 	    for u in self.uses:
@@ -146,7 +147,8 @@ C%(p)s::~C%(p)s ()
 
 void C%(p)s::f ()
 {
-    std::cout << "C%(p)s.f" << std::endl;\n''' % {"p":self.name}
+    std::cout << "C%(p)s.f" << std::endl;
+''' % {"p":self.name}
 
 	if len(self.uses) > 0:
 	    for k in self.uses:
@@ -506,21 +508,20 @@ cmt_action ()
 
 
 
-"""
-CMTGenerator
-
-Construct a CMT project with a hierarchy of projects each containing a hierarchy of packages each containing
- - sources of a library (with one C++ class)
- - sources of a test program (which instantiates one object of the class)
- - a cmt requirements file
- - or a CMakeLists.txt
-
-Projects may use other projects.
-Packages may use other packages.
-For each used package, the package's class includes the used classes, and instantiates one object for each the used classe
-      
-"""
 class CMTGenerator:
+    """
+    CMTGenerator
+
+    Construct a CMT project with a hierarchy of projects each containing a hierarchy of packages each containing
+     - sources of a library (with one C++ class)
+     - sources of a test program (which instantiates one object of the class)
+     - a cmt requirements file
+     - or a CMakeLists.txt
+
+    Projects may use other projects.
+    Packages may use other packages.
+    For each used package, the package's class includes the used classes, and instantiates one object for each the used classe.
+    """
     #---------------------------------------------------------
     def __init__ (self, mode = 'cmt2waf', projects = 1, max_packages = 1, uses = []):
 	global Letters
