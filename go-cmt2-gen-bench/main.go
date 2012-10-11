@@ -458,18 +458,21 @@ func main() {
 	}
 	fmt.Printf(":: uses:     %v\n", uses)
 
-	if path_exists("test") {
-		err := os.RemoveAll("test")
+	testdir := "test_"+*g_mode
+	fmt.Printf(":: testdir:  [%s]\n", testdir)
+
+	if path_exists(testdir) {
+		err := os.RemoveAll(testdir)
 		if err != nil {
 			panic(err.Error())
 		}
 	}
-	err := os.Mkdir("test", 0700)
+	err := os.Mkdir(testdir, 0700)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	err = os.Chdir("test")
+	err = os.Chdir(testdir)
 	if err != nil {
 		panic(err.Error())
 	}
