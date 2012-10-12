@@ -41,33 +41,28 @@ func main() {
 	}
 	fmt.Printf(":: uses:     %v\n", uses)
 
-	testdir := "test_"+*g_mode
-	fmt.Printf(":: testdir:  [%s]\n", testdir)
-
-	if path_exists(testdir) {
-		err := os.RemoveAll(testdir)
-		if err != nil {
-			panic(err.Error())
-		}
-	}
-	err := os.Mkdir(testdir, 0700)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	err = os.Chdir(testdir)
-	if err != nil {
-		panic(err.Error())
-	}
-
 	cmt.SetOutputLevel(*g_verbose)
-
 	mode := cmt.Mode(*g_mode)
-	gen := cmt.NewGenerator(mode, *g_projects, *g_packages, uses)
+	dir := "test_"+*g_mode
+
+	var err error
+
+	gen, err := cmt.NewGenerator(mode, dir, *g_projects, *g_packages, uses)
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Printf(">> generate project(s)...\n")
 	err = gen.Generate()
 	if err != nil {
 		panic(err.Error())
 	}
+
+	fmt.Printf(">> run build...\n")
+	err = gen.Run()
+	if err != nil {
+		panic(err.Error())
+	}
+
 	fmt.Printf(":: bye.\n")
 }
 

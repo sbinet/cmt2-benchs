@@ -27,7 +27,7 @@ func NewProject(mode Mode, name string, npkgs int) *Project {
 		if rand.Int31n(2) < 1 {
 			prefix = filepath.Join("Pre","Fix")
 		}
-		pkgname := fmt.Sprintf("Pkg_%04d", i+1)
+		pkgname := fmt.Sprintf("Pkg_%s_%04d", proj.Name[len("Proj_"):], i+1)
 		proj.Pkgs[i] = NewPkg(mode, name, prefix, pkgname)
 	}
 	return proj
@@ -103,7 +103,7 @@ cmt_project({{.Name}} "")
 {{with .Uses}}{{range .}}cmt_use_project({{.Name}})
 {{end}}{{end}}
 
-{{with .Pkgs}}{{range .}}cmt_has_package({{.Name}})
+{{with .Pkgs}}{{range .}}cmt_has_package({{.Name}} "{{.Prefix}}")
 {{end}}{{end}}
 
 `))
