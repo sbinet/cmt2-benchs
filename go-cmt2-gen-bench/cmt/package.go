@@ -57,6 +57,7 @@ func (pkg *Pkg) gen_structure() error {
 
 func (pkg *Pkg) gen_headers() error {
 	n := filepath.Join(pkg.Path, pkg.Name, fmt.Sprintf("Lib%s.h", pkg.Name))
+	debug("> gen [%s]\n", n)
 	f, err := os.Create(n)
 	if err != nil {
 		return err
@@ -66,6 +67,7 @@ func (pkg *Pkg) gen_headers() error {
 
 func (pkg *Pkg) gen_sources() error {
 	n := filepath.Join(pkg.Path, "src", fmt.Sprintf("Lib%s.cxx", pkg.Name))
+	debug("> gen [%s]\n", n)
 	f, err := os.Create(n)
 	if err != nil {
 		return err
@@ -75,6 +77,7 @@ func (pkg *Pkg) gen_sources() error {
 
 func (pkg *Pkg) gen_test() error {
 	n := filepath.Join(pkg.Path, "src", fmt.Sprintf("test%s.cxx", pkg.Name))
+	debug("> gen [%s]\n", n)
 	f, err := os.Create(n)
 	if err != nil {
 		return err
@@ -97,6 +100,7 @@ int main()
 
 func (pkg *Pkg) gen_requirements() error {
 	n := filepath.Join(pkg.Path, "cmt", "requirements")
+	debug("> gen [%s]\n", n)
 	f, err := os.Create(n)
 	if err != nil {
 		return err
@@ -121,8 +125,9 @@ program test{{.Name}} test{{.Name}}.cxx
 	return tmpl.Execute(f, pkg)
 }
 
-func (pkg *Pkg) gen() error {
+func (pkg *Pkg) generate() error {
 	var err error
+	debug("> gen [%s]\n", pkg.FullName)
 	err = pkg.gen_headers()
 	if err != nil {
 		return err
@@ -140,6 +145,37 @@ func (pkg *Pkg) gen() error {
 		return err
 	}
 	return err
+}
+
+func (pkg *Pkg) gen_config_file() error {
+	n := filepath.Join(pkg.Path, "CMakeLists.txt")
+	debug("> gen [%s]\n", n)
+	tmpl := template.Must(template.New("cmake_pkg").Parse(
+`## {{.Name}}
+cmake_minimum_required(VERSION 2.8)
+include($ENV{CMTROOT}/cmake/CMTLib.cmake)
+#-----------------
+cmt_package({{.Name}})
+
+{{with .Uses}}{{range .}}cmt_use_package ({{.Name}})
+{{end}}{{end}}
+
+cmt_library(Lib{{.Name}} src/Lib{{.Name}}.cxx "{{with .Uses}}{{range .}}cmt_use_package (Lib{{.Name}}){{end}}{{end}}")
+cmt_executable(test{{.Name}} src/test{{.Name}}.cxx Lib{{.Name}})
+cmt_test(mytest{{.Name}})
+
+#-----------------
+
+cmt_action ()
+
+## EOF ##
+`))
+
+	f, err := os.Create(n)
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(f, pkg)
 }
 
 // EOF

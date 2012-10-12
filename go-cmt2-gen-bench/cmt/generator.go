@@ -55,6 +55,7 @@ func (gen *Generator) cleanup_projects() error {
 }
 
 func (gen *Generator) gen_structure() error {
+	debug("> gen_structure...\n")
 	for _, proj := range gen.Projects {
 		if proj == nil {
 			continue
@@ -114,18 +115,33 @@ cmt_action()
 }
 
 func (gen *Generator) generate() error {
+	debug("> generate...\n")
 	var err error
-
+	for _, proj := range gen.Projects {
+		// if proj == nil {
+		// 	continue
+		// }
+		err = proj.generate()
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
 
 func (gen *Generator) gen_config_files() error {
+	debug("> gen_config_files...\n")
 	var err error
-
+	for _, proj := range gen.Projects {
+		err = proj.gen_config_file()
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
 
-func (gen *Generator) Run() error {
+func (gen *Generator) Generate() error {
 	var err error
 	err = gen.cleanup_projects()
 	if err != nil {

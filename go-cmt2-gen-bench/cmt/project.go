@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"text/template"
 )
 
 type Project struct {
@@ -32,8 +33,13 @@ func NewProject(mode Mode, name string, npkgs int) *Project {
 	return proj
 }
 
-func (proj *Project) gen() error {
-	return nil
+func (proj *Project) generate() error {
+	var err error
+	err = proj.gen_packages()
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 func (proj *Project) cleanup() error {
@@ -70,9 +76,47 @@ func (proj *Project) gen_structure() error {
 
 func (proj *Project) gen_packages() error {
 	var err error
-	
+	for _, pkg := range proj.Pkgs {
+		err = pkg.generate()
+		if err != nil {
+			return err
+		}
+	}
 	return err
 }
 
+func (proj *Project) gen_config_file() error {
+	n := filepath.Join(proj.Name, "CMakeLists.txt")
+	debug("> gen [%s]\n", n)
+	f, err := os.Create(n)
+	if err != nil {
+		return err
+	}
 
+	tmpl := template.Must(template.New("cmake-proj").Parse(
+`## {{.Name}}
+cmake_minimum_required(VERSION 2.8)
+include($ENV{CMTROOT}/cmake/CMTLib.cmake)
+#-----------------
+cmt_project({{.Name}} "")
+
+{{with .Uses}}{{range .}}cmt_use_project({{.Name}})
+{{end}}{{end}}
+
+{{with .Pkgs}}{{range .}}cmt_has_package({{.Name}})
+{{end}}{{end}}
+
+`))
+	err = tmpl.Execute(f, proj)
+	if err != nil {
+		return err
+	}
+	for _, pkg := range proj.Pkgs {
+		err = pkg.gen_config_file()
+		if err != nil {
+			return err
+		}
+	}
+	return err
+}
 // EOF

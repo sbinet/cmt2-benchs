@@ -64,7 +64,7 @@ func main() {
 
 	mode := cmt.Mode(*g_mode)
 	gen := cmt.NewGenerator(mode, *g_projects, *g_packages, uses)
-	err = gen.Run()
+	err = gen.Generate()
 	if err != nil {
 		panic(err.Error())
 	}
